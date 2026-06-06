@@ -1,12 +1,31 @@
-import pandas as pd
+# Ensure the project source directory is in sys.path
 import os
 import sys
+import logging
 
-# Ensure the project source directory is on sys.path so local modules can be imported.
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
+import pandas as pd
+from mcp.server.fastmcp import FastMCP
+
+# -----------------------
+# LOGGING SETUP
+# -----------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger("data_understanding")
+mcp = FastMCP("data_understanding")
+def main():
+    logger.info("Starting MCP server: data_understanding")
+    mcp.run(transport="stdio")
+
+
+@mcp.tool()
 def load_dataset(path:str):
     """
     Load a dataset from a CSV or Parquet file.
@@ -36,7 +55,7 @@ def load_dataset(path:str):
         raise ValueError("Unsupported file format")
     return data
 
-
+@mcp.tool()
 def get_schema(path:str):
     """
     Generate structural metadata of the dataset.
@@ -55,6 +74,7 @@ def get_schema(path:str):
         "missing_values": data.isnull().sum().to_dict()
     }
 
+@mcp.tool()
 def get_summary_stats(path:str):
     """
         Compute descriptive statistics for all columns in the dataset.
@@ -67,7 +87,7 @@ def get_summary_stats(path:str):
         """
     data = load_dataset(path)
     return data.describe(include="all").to_dict()
-
+@mcp.tool()
 def get_missing_values(path:str):
     """
     Calculate missing value counts for each column.
@@ -82,3 +102,7 @@ def get_missing_values(path:str):
     data =load_dataset(path)
 
     return data.isnull().sum().to_dict(orient="records")
+
+
+if __name__ == "__main__":
+    main()
