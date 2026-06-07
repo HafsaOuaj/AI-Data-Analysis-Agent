@@ -1,12 +1,31 @@
-import pandas as pd
-from tools.data_understanding import load_dataset
+# Ensure the project source directory is in sys.path
 import os
 import sys
+import logging
 
-# Ensure the project source directory is on sys.path so local modules can be imported.
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
+
+import pandas as pd
+from tools.data_understanding import load_dataset
+from mcp.server.fastmcp import FastMCP
+
+# -----------------------
+# LOGGING SETUP
+# -----------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger("relations_comparison")
+mcp = FastMCP("relations_comparison")
+def main():
+    logger.info("Starting MCP server: relations_comparison")
+    mcp.run(transport="stdio")
+
+
 
 def correlation(path: str, col1: str, col2: str):
     """
@@ -45,3 +64,6 @@ def compare_groups(path: str, group_col: str, target_col: str):
     grouped = data.groupby(group_col)[target_col].mean()
 
     return grouped.to_dict()
+
+if __name__ == "__main__":
+    main()

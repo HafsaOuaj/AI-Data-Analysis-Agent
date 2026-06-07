@@ -1,13 +1,29 @@
-import pandas as pd
-from tools.data_understanding import load_dataset
+# Ensure the project source directory is in sys.path
 import os
 import sys
+import logging
 
-# Ensure the project source directory is on sys.path so local modules can be imported.
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
+import pandas as pd
+from tools.data_understanding import load_dataset
+from mcp.server.fastmcp import FastMCP
+
+# -----------------------
+# LOGGING SETUP
+# -----------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger("single_column_analysis")
+mcp = FastMCP("single_column_analysis")
+def main():
+    logger.info("Starting MCP server: single_column_analysis")
+    mcp.run(transport="stdio")
 
 def value_counts(path: str, column: str):
     """
@@ -125,5 +141,4 @@ def outliers_iqr(path: str, column: str):
         "outliers": outliers.to_dict(orient="records")
     }
 if __name__ == "__main__":
-    results =distribution("data/ecommerce_customer_analytics.csv","age")
-    print(results)
+    main()

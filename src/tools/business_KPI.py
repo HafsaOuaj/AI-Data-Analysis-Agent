@@ -1,13 +1,33 @@
-import pandas as pd
-from tools.data_understanding import load_dataset
+# Ensure the project source directory is in sys.path
 import os
 import sys
+import logging
 
-# Ensure the project source directory is on sys.path so local modules can be imported.
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
+import pandas as pd
+from tools.data_understanding import load_dataset
+from mcp.server.fastmcp import FastMCP
+
+# -----------------------
+# LOGGING SETUP
+# -----------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger("business_KPI")
+mcp = FastMCP("business_KPI")
+def main():
+    logger.info("Starting MCP server: business_KPI")
+    mcp.run(transport="stdio")
+
+
+
+@mcp.tool()
 def get_total_revenue(path: str, revenue_column: str = "total_spent_usd"):
     """
     Compute total revenue from the dataset.
@@ -33,7 +53,7 @@ def get_total_revenue(path: str, revenue_column: str = "total_spent_usd"):
         "total_revenue": float(total_revenue)
     }
 
-
+@mcp.tool()
 def get_avg_order_value(path: str, revenue_column: str = "total_spent_usd"):
     """
     Compute average order value (AOV).
@@ -59,6 +79,7 @@ def get_avg_order_value(path: str, revenue_column: str = "total_spent_usd"):
         "average_order_value": float(aov)
     }
 
+@mcp.tool()
 def get_customer_lifetime_value(path: str, customer_column: str, revenue_column: str):
     """
     Compute average customer lifetime value (CLV).
@@ -94,6 +115,7 @@ def get_customer_lifetime_value(path: str, customer_column: str, revenue_column:
     }
 
 
+@mcp.tool()
 def get_churn_rate(path: str, churn_column: str = "churn"):
     """
     Compute churn rate from dataset.
@@ -120,6 +142,7 @@ def get_churn_rate(path: str, churn_column: str = "churn"):
     }
 
 
+@mcp.tool()
 def get_return_rate(path: str, return_column: str = "return_rate"):
     """
     Compute average return rate.
@@ -140,7 +163,7 @@ def get_return_rate(path: str, return_column: str = "return_rate"):
     return {
         "average_return_rate": float(data[return_column].mean())
     }
-
+@mcp.tool()
 def get_discount_usage_rate(path: str, discount_column: str = "uses_discount"):
     """
     Compute percentage of customers/orders using discounts.
@@ -163,6 +186,7 @@ def get_discount_usage_rate(path: str, discount_column: str = "uses_discount"):
     }
 
 
+@mcp.tool()
 def get_revenue_per_customer(path: str, customer_column: str, revenue_column: str):
     """
     Compute revenue generated per customer.
@@ -193,5 +217,4 @@ def get_revenue_per_customer(path: str, customer_column: str, revenue_column: st
     }
 
 if __name__ == "__main__":
-    results =get_churn_rate("data/ecommerce_customer_analytics.csv")
-    print(results)
+    main()
